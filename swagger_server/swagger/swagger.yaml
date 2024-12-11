@@ -1,0 +1,423 @@
+openapi: 3.0.3
+info:
+  title: Products API TT 24.1211
+  description: |
+    This a sample specification part of a YT tutorial showcasing how to design a RESTful API contract using OpenAPI.
+
+    We are going to create an API to manage products with the the following operations:
+    * List all Products
+    * Create a Product
+    * Get Product details
+    * Update Product
+    * Delete Product
+
+    We will cover also the following topics:
+    * Result pagination
+    * Security (Auth'n / Auth'z)
+
+    We will use a simple **Product** resource representation with the following properties:
+    * ID
+    * Name
+    * Price
+    * Description (optional)
+    * Last updated date-time
+  version: v1
+servers:
+- url: https://marcolenzo.eu/products-api/v1
+  description: Production environment
+- url: http://localhost:8080/products-api/v1
+  description: Localhost environment
+#security:
+#- OAuthClientCredentials:
+#  - products
+tags:
+- name: Products
+  description: Product management
+  externalDocs:
+    url: https://marcolenzo.eu/docs/products
+paths:
+  /products:
+    get:
+      tags:
+      - Products
+      summary: List products
+      description: Use this endpoint to browse all products in the catalog
+      operationId: get_all_products
+      parameters:
+      - name: offset
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 5
+      responses:
+        "200":
+          description: Paginated array of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "401":
+          description: UnauthorizedResponse. Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: You do not have enough rights to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "4XX":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+    post:
+      tags:
+      - Products
+      summary: Create a product
+      description: Use this endpoint to add a new product to the catalog
+      operationId: create_product
+      requestBody:
+        $ref: '#/components/requestBodies/ProductRequest'
+      responses:
+        "200":
+          description: Product Details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "401":
+          description: UnauthorizedResponse. Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: You do not have enough rights to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "4XX":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+  /products/{id}:
+    get:
+      tags:
+      - Products
+      summary: Get product details
+      description: Use this endpoint to get details about a specific product
+      operationId: get_product
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1001"
+      responses:
+        "200":
+          description: Product Details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "401":
+          description: UnauthorizedResponse. Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: You do not have enough rights to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "4XX":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+    put:
+      tags:
+      - Products
+      summary: Update product's details
+      description: Use this endpoint to update the product's details
+      operationId: update_product
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1001"
+      requestBody:
+        $ref: '#/components/requestBodies/ProductRequest'
+      responses:
+        "200":
+          description: Product Details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "401":
+          description: UnauthorizedResponse. Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: You do not have enough rights to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "4XX":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+    delete:
+      tags:
+      - Products
+      summary: Delete product
+      description: Use this endpoint to remove a product from the catalog
+      operationId: delete_product
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1001"
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: UnauthorizedResponse. Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: You do not have enough rights to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "4XX":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+components:
+  schemas:
+    PaginatedResult:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page offset
+          example: 10
+        limit:
+          type: integer
+          description: Page size limit
+          example: 5
+        total:
+          type: integer
+          description: Total number of records across all pages
+          example: 1500
+        data:
+          type: array
+          items: {}
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Product identifier
+          readOnly: true
+          example: "1001"
+        name:
+          type: string
+          description: Product name
+          example: Coffee
+        price:
+          type: number
+          description: Product price
+          format: double
+          example: 4.99
+        description:
+          type: string
+          description: Product description
+          example: Arabica coffee beans
+        lastUpdatedOn:
+          type: string
+          description: Timestamp of last product update
+          format: date-time
+          readOnly: true
+          example: 2023-01-01T10:10:10Z
+      example:
+        price: 4.99
+        name: Coffee
+        description: Arabica coffee beans
+        lastUpdatedOn: 2023-01-01T10:10:10Z
+        id: "1001"
+    ProductArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Error details
+    inline_response_200:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResult'
+      - type: object
+        properties:
+          data:
+            $ref: '#/components/schemas/ProductArray'
+  responses:
+    ProductResponse:
+      description: Product Details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Product'
+    ProductArrayResponse:
+      description: Paginated array of products
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_200'
+    ClientErrorResponse:
+      description: Client error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnexpectedErrorResponse:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFoundResponse:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnauthorizedResponse:
+      description: UnauthorizedResponse. Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ForbiddenResponse:
+      description: You do not have enough rights to perform this operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  requestBodies:
+    ProductRequest:
+      description: Product Details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Product'
+#  securitySchemes:
+#    OAuthClientCredentials:
+##      type: oauth2
+#      flows:
+#        clientCredentials:
+#          tokenUrl: https://marcolenzo.eu/auth/token
+#          scopes:
+#            products: Grants full admin access
+#      x-tokenInfoFunc: swagger_server.controllers.authorization_controller.check_OAuthClientCredentials
+#      x-scopeValidateFunc: swagger_server.controllers.authorization_controller.validate_scope_OAuthClientCredentials
+
